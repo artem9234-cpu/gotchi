@@ -720,16 +720,22 @@ function setSound(v) {
 
 /* ---------- цикл ---------- */
 let raf = 0, last = 0, saveT = 0, running = false;
+let errShown = false, sizeT = 0;
 function loop(now) {
   raf = requestAnimationFrame(loop);
   if (!last) last = now;
   const dt = Math.min(.05, (now - last) / 1000); last = now;
-  Game.tick(Date.now());
-  drainEvents();
-  updateAnim(dt);
-  render();
-  if (document.body.classList.contains('phase-hatchery')) renderPreviews(A.t);
-  hudT += dt; if (hudT > .25) { hudT = 0; refreshHUD(); syncRail(); }
+  try {
+    Game.tick(Date.now());
+    drainEvents();
+    updateAnim(dt);
+    render();
+    if (document.body.classList.contains('phase-hatchery')) renderPreviews(A.t);
+  } catch (e) {
+    if (!errShown) { errShown = true; showFatal('loop: ' + (e && e.message ? e.message : e)); }
+  }
+  hudT += dt; if (hudT > .25) { hudT = 0; try { refreshHUD(); syncRail(); } catch (e) {} }
+  sizeT += dt; if (sizeT > 1) { sizeT = 0; fitCanvas(); }
   saveT += dt; if (saveT > 5) { saveT = 0; Game.save(); }
 }
 function start() { if (running) return; running = true; last = 0; raf = requestAnimationFrame(loop); }
