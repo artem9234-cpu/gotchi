@@ -17,9 +17,9 @@ g.imageSmoothingEnabled = false; vctx.imageSmoothingEnabled = false;
 
 function fitCanvas() {
   const r = $('lcdBox').getBoundingClientRect();
-  if (!r.width) return;
+  if (!r.width || !r.height) return;
   const dpr = Math.min(2, window.devicePixelRatio || 1);
-  const w = Math.round(r.width * dpr), h = Math.round(r.width * (Pixel.H / Pixel.W) * dpr);
+  const w = Math.round(r.width * dpr), h = Math.round(r.height * dpr);
   if (view.width !== w || view.height !== h) { view.width = w; view.height = h; vctx.imageSmoothingEnabled = false; }
 }
 if (window.ResizeObserver) new ResizeObserver(fitCanvas).observe($('lcdBox'));
@@ -202,7 +202,7 @@ function startCatch() {
 function updateCatch(dt) {
   const C = A.catch; if (!C || C.done || C.paused) return;
   C.t -= dt; C.spawn -= dt;
-  if (C.dir) { C.x = clamp(C.x + C.dir * 78 * dt, 16, 112); A.x = C.x; A.walk = true; A.flip = C.dir < 0; }
+  if (C.dir) { C.x = clamp(C.x + C.dir * 78 * dt, 26, 102); A.x = C.x; A.walk = true; A.flip = C.dir < 0; }
   else A.walk = false;
   if (C.spawn <= 0) {
     C.spawn = .52 + Math.random() * .38;
@@ -210,7 +210,7 @@ function updateCatch(dt) {
   }
   for (let i = C.items.length - 1; i >= 0; i--) {
     const it = C.items[i]; it.y += it.v * dt;
-    if (it.y > 78 && it.y < 92 && Math.abs(it.x - C.x) < 15) {
+    if (it.y > 72 && it.y < 92 && Math.abs(it.x - C.x) < 17) {
       C.items.splice(i, 1);
       if (it.bomb) { C.lives--; Sound.play('error'); A.shake = .35; burst('star', it.x, it.y, 5, { c:'#ff4d5e' }); }
       else { C.score++; Sound.play('coin'); burst('heart', it.x, it.y, 3, { c:'#ff3d8b' }); }
@@ -296,7 +296,7 @@ function updateAnim(dt) {
   // блуждание
   if (mode === 'idle' && s.born && !s.dead && !s.sleeping && !s.sick) {
     if (Math.abs(A.x - A.tx) < 1.5) {
-      if (Math.random() < dt * .35) A.tx = 26 + Math.random() * 76;
+      if (Math.random() < dt * .35) A.tx = 40 + Math.random() * 52;
       A.walk = false;
     } else {
       const d = Math.sign(A.tx - A.x);
@@ -330,10 +330,10 @@ function render() {
   if (mode === 'hatch') {
     Pixel.drawRoom(g, T, 12, { space: s.owned.space && s.theme === 'space' });
     const wob = Math.sin(A.t * 9) * (A.hatchShake > 0 ? 3 : 1.2);
-    Pixel.drawEgg(g, 64 + wob, 66, 1.5, Game.pal(), A.cracks, T);
+    Pixel.drawEgg(g, 64 + wob, 59, 1.7, Game.pal(), A.cracks, T);
     Pixel.textC(g, 'НАЖМИ B', 64, 96, T.ink, 1);
     Pixel.textC(g, A.cracks + '/5', 64, 104, T.ink, 1);
-    Pixel.textC(g, 'GOTCHI', 64, 2, T.ink, 1);
+    Pixel.textC(g, 'BALBESOV DVOR', 64, 2, T.ink, 1);
   }
   else if (mode === 'evolve') {
     const fl = Math.sin(cutscene * 22) > 0;
@@ -400,26 +400,26 @@ function render() {
     Pixel.text(g, hh + ':00', 96, 2, T.ink, 1);
 
     // нижняя строка / контекст
-    Pixel.R(g, 0, 96, Pixel.W, 16, Pixel.mix(T.lcd, T.ink, .1));
+    Pixel.R(g, 0, 94, Pixel.W, 18, Pixel.mix(T.lcd, T.ink, .1));
     if (mode === 'sub' && sub) {
-      Pixel.textC(g, sub.title, 64, 97, T.ink, 1);
+      Pixel.textC(g, sub.title, 64, 96, T.ink, 1);
       const it = sub.items[subIdx];
-      Pixel.textC(g, '> ' + it.label, 64, 105, T.ink, 1);
+      Pixel.textC(g, '> ' + it.label, 64, 104, T.ink, 1);
     } else if (mode === 'lr' && A.lr) {
       const L = A.lr;
-      Pixel.text(g, 'СЧЁТ ' + L.score + '/' + L.total, 2, 97, T.ink, 1);
-      if (L.done) Pixel.textC(g, 'B - ВЫХОД', 64, 105, T.ink, 1);
-      else if (L.phase === 'ask') Pixel.textC(g, 'A: <   C: >', 64, 105, T.ink, 1);
-      else Pixel.textC(g, L.guess === L.actual ? 'УГАДАЛ!' : 'МИМО', 64, 105, T.ink, 1);
+      Pixel.text(g, 'СЧЁТ ' + L.score + '/' + L.total, 2, 96, T.ink, 1);
+      if (L.done) Pixel.textC(g, 'B - ВЫХОД', 64, 104, T.ink, 1);
+      else if (L.phase === 'ask') Pixel.textC(g, 'A: <   C: >', 64, 104, T.ink, 1);
+      else Pixel.textC(g, L.guess === L.actual ? 'УГАДАЛ!' : 'МИМО', 64, 104, T.ink, 1);
       if (L.phase !== 'ask' && !L.done) {
-        Pixel.textC(g, L.actual < 0 ? '<<<' : '>>>', 64, 24, T.accent, 2);
+        Pixel.textC(g, L.actual < 0 ? '<<<' : '>>>', 64, 26, T.accent, 2);
       }
     } else if (mode === 'catch' && A.catch) {
       const C = A.catch;
-      Pixel.text(g, '♥' + C.score, 2, 97, T.ink, 1);
-      Pixel.text(g, 'HP' + C.lives, 44, 97, T.ink, 1);
-      Pixel.text(g, Math.max(0, Math.ceil(C.t)) + 'C', 96, 97, T.ink, 1);
-      Pixel.textC(g, C.done ? 'B - ВЫХОД' : (C.paused ? 'ПАУЗА' : 'A/C - ДВИЖЕНИЕ'), 64, 105, T.ink, 1);
+      Pixel.text(g, '♥' + C.score, 2, 96, T.ink, 1);
+      Pixel.text(g, 'HP' + C.lives, 44, 96, T.ink, 1);
+      Pixel.text(g, Math.max(0, Math.ceil(C.t)) + 'C', 96, 96, T.ink, 1);
+      Pixel.textC(g, C.done ? 'B - ВЫХОД' : (C.paused ? 'ПАУЗА' : 'A/C - ДВИЖЕНИЕ'), 64, 104, T.ink, 1);
     } else {
       let st = 'ВСЁ ХОРОШО';
       if (s.sleeping) st = 'СПИТ';
@@ -429,12 +429,12 @@ function render() {
       else if (s.poops.length) st = 'ГРЯЗНО!';
       else if (Game.overweight()) st = 'ПЕРЕКОРМ';
       else if (s.energy < 20) st = 'УСТАЛ';
-      Pixel.textC(g, st, 64, 98, T.ink, 1);
+      Pixel.textC(g, st, 64, 96, T.ink, 1);
       const hearts = '♥'.repeat(Math.round(s.hunger)) + '♡'.repeat(4 - Math.round(s.hunger));
-      Pixel.text(g, hearts, 2, 106, T.ink, 1);
+      Pixel.text(g, hearts, 2, 104, T.ink, 1);
       const hap = '♥'.repeat(Math.round(s.happy)) + '♡'.repeat(4 - Math.round(s.happy));
-      Pixel.text(g, hap, 100, 106, T.ink, 1);
-      Pixel.textC(g, STAGE_RU[s.stage].toUpperCase(), 64, 106, T.ink, 1);
+      Pixel.text(g, hap, 100, 104, T.ink, 1);
+      Pixel.textC(g, STAGE_RU[s.stage].toUpperCase(), 64, 104, T.ink, 1);
     }
   }
 
