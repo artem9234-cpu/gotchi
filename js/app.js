@@ -9,6 +9,17 @@ const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp 
 const $ = id => document.getElementById(id);
 const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 
+// защитная обёртка: если audio.js не подгрузился — не падаем
+if (!window.Sound) {
+  window.Sound = {
+    unlock: function(){},
+    set: function(){},
+    play: function(){},
+    stop: function(){}
+  };
+  console.warn('Sound fallback: audio.js не загрузился');
+}
+
 /* ---------- канвас ---------- */
 const view = $('lcd'), vctx = view.getContext('2d');
 const buf = document.createElement('canvas'); buf.width = Pixel.W; buf.height = Pixel.H;
@@ -27,7 +38,7 @@ function fitCanvas() {
   if (view.width !== w || view.height !== h) {
     view.width = w; view.height = h;
     vctx.imageSmoothingEnabled = false;
-    try { render(); } catch (e) {}   // сразу перерисовываем: resize очищает канвас
+    try { render(); } catch (e) {}
   }
 }
 if (window.ResizeObserver) new ResizeObserver(fitCanvas).observe($('lcdBox'));
