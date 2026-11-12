@@ -5,7 +5,7 @@
 :root{
   --ink:#0c0817; --ink2:#150f28; --surface:#1d1636; --surface2:#271d47;
   --overlay:#2f2358; --line:#3d2f6b; --scrim:rgba(8,5,18,.72);
-  --cream:#f7efe2; --mute:#a294c4; --mute2:#7b6 da0;
+  --cream:#f7efe2; --mute:#a294c4; --mute2:#7b6da0;
   --magenta:#ff3d8b; --cyan:#35e0ff; --lime:#b6ff3d; --amber:#ffb020; --grape:#8b5cf6;
   --ok:#46e08a; --warn:#ffb020; --bad:#ff4d5e; --info:#35e0ff;
   --shell1:#7b4bd6; --shell2:#4a2a92; --shell3:#2d1a5e;
@@ -305,7 +305,7 @@ body.phase-hatchery .device-wrap{display:none}
 
 /* ================= TELEGRAM MINI APP ================= */
 :root{--tma-vh:100vh}
-body.tma{min-height:var(--tma-vh)}
+body.tma{min-height:var(--tma-vh);padding-top:0}
 body.tma .topbar{padding-top:calc(9px + env(safe-area-inset-top))}
 body.tma .stage{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
 
