@@ -93,47 +93,44 @@ const Pixel = (() => {
   }
 
   /* ---------- комната ---------- */
-  function drawRoom(g, T, hour, o) {
+    function drawRoom(g, T, hour, o) {
     o = o || {};
     R(g,0,0,W,H,T.lcd);
-    R(g,0,8,W,80,T.wall);
-    // обои
+    R(g,0,10,W,72,T.wall);
     g.fillStyle = T.wall2;
-    for (let y = 12; y < 86; y += 10) for (let x = ((y/10)%2?4:9); x < W; x += 12) g.fillRect(x,y,2,2);
-    if (o.space) { // космические обои
-      R(g,0,8,W,80,'#141033');
-      for (let i=0;i<44;i++){ const x=(i*37)%126+1, y=(i*53)%74+10;
+    for (let y = 14; y < 78; y += 10) for (let x = ((y/10)%2?4:9); x < W; x += 12) g.fillRect(x,y,2,2);
+    if (o.space) {
+      R(g,0,10,W,72,'#141033');
+      for (let i=0;i<44;i++){ const x=(i*37)%126+1, y=(i*53)%64+12;
         g.fillStyle = i%5===0?'#ffd88a':'#8ea2d8'; g.fillRect(x,y,1,1); }
-      E(g,104,26,9,9,'#3a2a72'); E(g,101,23,3,3,'#5a44a0');
+      E(g,104,28,9,9,'#3a2a72'); E(g,101,25,3,3,'#5a44a0');
     }
     // пол
-    R(g,0,88,W,24,T.floor);
-    g.fillStyle=T.floor2; for(let x=0;x<W;x+=16) g.fillRect(x,88,1,24);
-    R(g,0,88,W,1,shade(T.floor,-40));
-    R(g,0,86,W,2,shade(T.wall2,-26));
+    R(g,0,82,W,30,T.floor);
+    g.fillStyle=T.floor2; for(let x=0;x<W;x+=16) g.fillRect(x,82,1,30);
+    R(g,0,82,W,1,shade(T.floor,-40));
+    R(g,0,80,W,2,shade(T.wall2,-26));
     // окно
     if(!o.space){
       const skyIdx = hour<6?3 : hour<9?0 : hour<18?1 : hour<21?2 : 3;
       const sky = T.sky[skyIdx];
-      R(g,90,16,30,26,shade(T.wall2,-50));
-      R(g,92,18,26,22,sky);
+      R(g,88,16,32,26,shade(T.wall2,-50));
+      R(g,90,18,28,22,sky);
       if(skyIdx===3){ g.fillStyle='#fff';
-        [[96,22],[104,26],[112,21],[100,33],[114,34],[108,20]].forEach(p=>g.fillRect(p[0],p[1],1,1));
+        [[94,22],[102,26],[112,21],[98,33],[114,34],[106,20]].forEach(p=>g.fillRect(p[0],p[1],1,1));
         E(g,112,24,4,4,'#fff8d0'); E(g,110,23,3,3,sky);
       } else if(skyIdx===1){ E(g,112,23,4,4,'#fff3a8');
-        E(g,99,26,4,2,'#ffffff'); E(g,103,25,3,2,'#ffffff'); }
-      else { E(g,105,30,5,5,'#ffd06a'); }
-      R(g,104,18,2,22,shade(T.wall2,-50)); R(g,92,28,26,2,shade(T.wall2,-50));
+        E(g,97,26,4,2,'#ffffff'); E(g,101,25,3,2,'#ffffff'); }
+      else { E(g,104,30,5,5,'#ffd06a'); }
+      R(g,103,18,2,22,shade(T.wall2,-50)); R(g,90,28,28,2,shade(T.wall2,-50));
     }
-    // картинка на стене
-    R(g,12,20,20,16,shade(T.wall2,-46)); R(g,14,22,16,12,mix(T.lcd,T.accent,.18));
-    TRI(g,16,26,7,6,shade(T.accent,-30),1); TRI(g,22,24,7,8,T.accent,1);
-    R(g,14,32,16,2,shade(T.accent,-50));
-    // мяч, если куплен
-    if(o.ball){ E(g,18,84,4,4,T.accent); R(g,14,83,9,1,shade(T.accent,60)); }
-    // ночное затемнение
+    // картина
+    R(g,10,20,22,17,shade(T.wall2,-46)); R(g,12,22,18,13,mix(T.lcd,T.accent,.18));
+    TRI(g,14,26,8,7,shade(T.accent,-30),1); TRI(g,21,24,8,9,T.accent,1);
+    R(g,12,33,18,2,shade(T.accent,-50));
+    if(o.ball){ E(g,16,78,4,4,T.accent); R(g,12,77,9,1,shade(T.accent,60)); }
     if(o.dark){ g.fillStyle='rgba(6,4,20,.62)'; g.fillRect(0,0,W,H);
-      E(g,64,52,44,34,'rgba(120,140,255,.06)'); }
+      E(g,64,52,46,36,'rgba(120,140,255,.06)'); }
   }
 
   /* ---------- яйцо ---------- */
