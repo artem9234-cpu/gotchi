@@ -16,14 +16,41 @@ const g = buf.getContext('2d');
 g.imageSmoothingEnabled = false; vctx.imageSmoothingEnabled = false;
 
 function fitCanvas() {
-  const r = $('lcdBox').getBoundingClientRect();
-  if (!r.width || !r.height) return;
+  const box = $('lcdBox');
+  if (!box) return;
+  const r = box.getBoundingClientRect();
+  const cssW = r.width || box.clientWidth || 0;
+  if (cssW < 8) return;
   const dpr = Math.min(2, window.devicePixelRatio || 1);
-  const w = Math.round(r.width * dpr), h = Math.round(r.height * dpr);
-  if (view.width !== w || view.height !== h) { view.width = w; view.height = h; vctx.imageSmoothingEnabled = false; }
+  const w = Math.max(128, Math.round(cssW * dpr));
+  const h = Math.max(112, Math.round(w * Pixel.H / Pixel.W));
+  if (view.width !== w || view.height !== h) {
+    view.width = w; view.height = h;
+    vctx.imageSmoothingEnabled = false;
+    try { render(); } catch (e) {}   // сразу перерисовываем: resize очищает канвас
+  }
 }
 if (window.ResizeObserver) new ResizeObserver(fitCanvas).observe($('lcdBox'));
 window.addEventListener('resize', fitCanvas);
+
+function showFatal(msg) {
+  let el = document.getElementById('fatal');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'fatal';
+    el.style.cssText = 'position:fixed;left:8px;right:8px;top:70px;z-index:999;padding:10px 12px;' +
+      'border-radius:12px;background:#2b0f18;border:1px solid #ff4d5e;color:#ffd7dc;' +
+      'font:12px/1.45 monospace;white-space:pre-wrap;max-height:38vh;overflow:auto';
+    document.body.appendChild(el);
+  }
+  el.textContent = '⚠️ ' + msg;
+}
+window.addEventListener('error', function (e) {
+  showFatal((e.message || 'error') + '\n' + (e.filename || '') + ':' + (e.lineno || 0));
+});
+window.addEventListener('unhandledrejection', function (e) {
+  showFatal('promise: ' + (e.reason && e.reason.message ? e.reason.message : e.reason));
+});
 
 /* ---------- анимационная модель ---------- */
 const A = {
