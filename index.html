@@ -6,7 +6,10 @@
 <meta name="theme-color" content="#150f28">
 <title>Балбесов двор — карманный питомец</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=5">
+<style>
+  .memorial[hidden],.away[hidden]{display:none!important}
+</style>
 </head>
 <body class="phase-hatchery">
 
@@ -19,10 +22,14 @@
     <span class="brand-txt">БАЛБЕСОВ ДВОР<b>·</b><i id="petTitle">инкубатор</i></span>
   </div>
   <div class="topbar-right">
+    <span class="syncdot" id="syncDot" data-state="idle" title="Синхронизация"></span>
     <div class="coinpill" id="coinPill" title="Готчи — внутренняя валюта">
       <svg viewBox="0 0 16 16" width="14" height="14"><circle cx="8" cy="8" r="7" fill="#ffb020"/><circle cx="8" cy="8" r="4.4" fill="none" stroke="#7a4a00" stroke-width="1.4"/><path d="M8 4.6v6.8M6 6.4h3.2a1.8 1.8 0 010 3.6H6" stroke="#7a4a00" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>
       <span id="coinVal">0</span>
     </div>
+    <button class="icobtn" id="btnShare" aria-label="Поделиться" title="Поделиться питомцем">
+      <svg viewBox="0 0 20 20" width="18" height="18"><circle cx="15" cy="4.6" r="2.6" fill="currentColor"/><circle cx="5" cy="10" r="2.6" fill="currentColor"/><circle cx="15" cy="15.4" r="2.6" fill="currentColor"/><path d="M7.3 8.8l5.4-2.9M7.3 11.2l5.4 2.9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
     <button class="icobtn" id="btnSound" aria-label="Звук" title="Звук вкл/выкл">
       <svg viewBox="0 0 20 20" width="18" height="18" id="sndIcon"><path d="M4 8h3l4-3.5v11L7 12H4z" fill="currentColor"/><path class="wave" d="M13.4 7.2a4 4 0 010 5.6M15.6 5a7 7 0 010 10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/><path class="mute" d="M13.5 7.5l5 5m0-5l-5 5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
     </button>
@@ -34,7 +41,6 @@
 
 <main class="stage">
 
-  <!-- ================= ИНКУБАТОР ================= -->
   <section class="hatchery" id="hatchery">
     <div class="hatch-head">
       <p class="kicker">поколение <b id="genNum">1</b></p>
@@ -54,11 +60,10 @@
     <p class="hatch-note">Прогресс сохраняется автоматически — в Telegram Cloud и локально. Питомец продолжает жить, пока приложение закрыто.</p>
   </section>
 
-  <!-- ================= УСТРОЙСТВО ================= -->
   <section class="device-wrap" id="deviceWrap">
     <div class="device" id="device">
       <div class="shell-gloss" aria-hidden="true"></div>
-            <div class="shell-top">
+      <div class="shell-top">
         <span class="speaker"><i></i><i></i><i></i><i></i><i></i></span>
         <span class="shell-brand">БАЛБЕСОВ ДВОР</span>
         <span class="model"><span class="callamp" id="callLamp" title="Питомец зовёт"></span>зов питомца</span>
@@ -94,11 +99,10 @@
         <button class="key key-b" id="keyB" aria-label="Кнопка B — подтвердить"><b>B</b><small>ок</small></button>
         <button class="key key-c" id="keyC" aria-label="Кнопка C — отмена"><b>C</b><small>назад</small></button>
       </div>
-          </div>
+    </div>
     <p class="pad-hint" id="padHint">A — листать · B — подтвердить · C — отмена</p>
   </section>
 
-  <!-- ================= БОКОВАЯ ПАНЕЛЬ / ШТОРКА ================= -->
   <aside class="panel" id="panel">
     <div class="panel-grip" id="panelGrip"></div>
     <nav class="tabs" id="tabs">
@@ -113,7 +117,6 @@
   </aside>
 </main>
 
-<!-- ================= МЕМОРИАЛ ================= -->
 <div class="memorial" id="memorial" hidden>
   <div class="mem-card">
     <canvas id="memCanvas" width="128" height="112"></canvas>
@@ -136,9 +139,10 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="js/audio.js?v=4"></script>
-<script src="js/pixel.js?v=4"></script>
-<script src="js/state.js?v=4"></script>
-<script src="js/app.js?v=4"></script>
+<script src="js/audio.js?v=5"></script>
+<script src="js/pixel.js?v=5"></script>
+<script src="js/state.js?v=5"></script>
+<script src="js/telegram.js?v=5"></script>
+<script src="js/app.js?v=5"></script>
 </body>
 </html>
