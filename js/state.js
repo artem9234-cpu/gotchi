@@ -33,7 +33,7 @@ const SPECIES = {
 const STAGES = ['baby','child','teen','adult','senior'];
 const STAGE_RU = { egg:'яйцо', baby:'малыш', child:'ребёнок', teen:'подросток', adult:'взрослый', senior:'старейшина' };
 const STAGE_AT = { baby:0, child:8, teen:24, adult:60, senior:144 };   // в игровых часах
-const STAGE_SCALE = { baby:.5, child:.68, teen:.85, adult:1, senior:.96 };
+const STAGE_SCALE = { baby:.62, child:.8, teen:.98, adult:1.18, senior:1.12 };
 
 const SHOP = [
   { id:'apple',   ico:'🍎', name:'Яблоко',        price:15,  kind:'food',  desc:'+2 сытости, всего +1 г веса.' },
