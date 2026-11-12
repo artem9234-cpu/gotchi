@@ -302,3 +302,37 @@ body.phase-hatchery .device-wrap{display:none}
   .pad-hint{font-size:11px}
 }
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* ================= TELEGRAM MINI APP ================= */
+:root{--tma-vh:100vh}
+body.tma{min-height:var(--tma-vh)}
+body.tma .topbar{padding-top:calc(9px + env(safe-area-inset-top))}
+body.tma .stage{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
+
+.syncdot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;background:var(--mute2);
+  box-shadow:0 0 0 3px rgba(255,255,255,.04);transition:.25s}
+.syncdot[data-state="idle"]{background:var(--cyan);box-shadow:0 0 9px rgba(53,224,255,.6)}
+.syncdot[data-state="saving"]{background:var(--amber);box-shadow:0 0 10px var(--amber);animation:syncpulse .8s ease-in-out infinite}
+.syncdot[data-state="synced"]{background:var(--ok);box-shadow:0 0 10px rgba(70,224,138,.7)}
+.syncdot[data-state="error"]{background:var(--bad);box-shadow:0 0 10px rgba(255,77,94,.7)}
+.syncdot[data-state="local"]{background:var(--mute2);box-shadow:none}
+@keyframes syncpulse{50%{opacity:.3;transform:scale(.78)}}
+
+#btnShare{color:var(--lime);border-color:rgba(182,255,61,.34);background:rgba(182,255,61,.12)}
+#btnShare:hover{background:rgba(182,255,61,.26);border-color:rgba(182,255,61,.6)}
+.coinpill{cursor:pointer;transition:.16s}
+.coinpill:hover{border-color:rgba(255,176,32,.75);transform:translateY(-1px)}
+
+@media(max-width:460px){
+  .topbar{padding-left:10px;padding-right:10px;gap:6px}
+  .topbar-right{gap:6px}
+  .icobtn{width:33px;height:33px;border-radius:10px}
+  .icobtn svg{width:16px;height:16px}
+  .coinpill{padding:4px 8px;font-size:12px}
+  .brand-txt{font-size:11px;letter-spacing:.06em}
+  .syncdot{width:7px;height:7px}
+}
+@media(max-width:360px){
+  .brand-txt i{display:none}
+  .brand-txt b{display:none}
+}
