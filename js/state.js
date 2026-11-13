@@ -39,7 +39,7 @@ const SHOP = [
   { id:'apple',   ico:'🍎', name:'Яблоко',        price:15,  kind:'food',  desc:'+2 сытости, всего +1 г веса.' },
   { id:'cake',    ico:'🍰', name:'Торт',          price:30,  kind:'food',  desc:'+2 радости, но +5 г. Осторожно с весом.' },
   { id:'vitamin', ico:'💊', name:'Витамины',      price:45,  kind:'food',  desc:'Лечит болезнь и даёт +25 здоровья.' },
-  { id:'ball',    ico:'⚽', name:'Мяч',           price:120, kind:'perm',  desc:'Открывает аркаду «Лови сердечки».' },
+  { id:'ball',    ico:'🕹', name:'Аркадный жетон', price:120, kind:'perm',  desc:'+1 дополнительная жизнь в Галаге. Навсегда.' },
   { id:'classic', ico:'🟩', name:'Экран «Классик»',price:90, kind:'theme', desc:'Монохромный ЖК-экран, как в 1996-м.' },
   { id:'neon',    ico:'🌈', name:'Экран «Неон»',  price:160, kind:'theme', desc:'Тёмный экран с кислотной графикой.' },
   { id:'space',   ico:'🚀', name:'Обои «Космос»', price:220, kind:'theme', desc:'Комната превращается в звёздный отсек.' }
@@ -56,7 +56,11 @@ const AWARDS = [
   { id:'perfect', ico:'💯', name:'Идеальные сутки',desc:'24 игровых часа без ошибок' },
   { id:'rich',    ico:'💰', name:'Копилка',        desc:'Накопить 300 готчи' },
   { id:'dynasty', ico:'🌳', name:'Династия',       desc:'Сменить 3 поколения' },
-  { id:'secret',  ico:'🛸', name:'Контакт',        desc:'Открыть секретный вид' }
+  { id:'secret',  ico:'🛸', name:'Контакт',        desc:'Открыть секретный вид' },
+  { id:'galaga_dual',   ico:'🛩', name:'Спасатель',      desc:'Вернуть захваченный истребитель в Галаге' },
+  { id:'galaga_perfect',ico:'🎯', name:'Идеальный залп', desc:'Сбить всех 40 в бонус-раунде Галаги' },
+  { id:'galaga_ace',    ico:'🚀', name:'Ас Галаги',      desc:'20 000 очков за одну игру в Галагу' },
+  { id:'galaga_legend', ico:'🏅', name:'Легенда двора',  desc:'50 000 очков в Галаге' }
 ];
 
 const SAVE_KEY = 'gotchi.save.v1';
@@ -80,9 +84,10 @@ const Game = {
       items: { apple:1, cake:0, vitamin:1 },
       owned: { ball:false, classic:false, neon:false, space:false },
       theme: 'color',
-      stats: { meals:0, snacks:0, games:0, wins:0, cleans:0, cures:0, scolds:0, pets:0 },
+      stats: { meals:0, snacks:0, games:0, wins:0, cleans:0, cures:0, scolds:0, pets:0, galaga:0, galagaBest:0 },
       awards: [], graveyard: [], unlocked: { alien:false },
-      speed: 1, sound: true, deathCause: '', lifespan: 210
+      speed: 1, sound: true, deathCause: '', lifespan: 210, galagaHi: 0,
+      galagaPlays: 0, galagaBest: 0,
     };
   },
 
@@ -150,7 +155,8 @@ const Game = {
     const keep = { coins:this.s.coins, gen:this.s.gen, awards:this.s.awards.slice(),
                    graveyard:this.s.graveyard.slice(), unlocked:Object.assign({},this.s.unlocked),
                    owned:Object.assign({},this.s.owned), items:Object.assign({},this.s.items),
-                   theme:this.s.theme, speed:this.s.speed, sound:this.s.sound, stats:Object.assign({},this.s.stats) };
+                   theme:this.s.theme, speed:this.s.speed, sound:this.s.sound, stats:Object.assign({},this.s.stats),
+                   galagaHi:this.s.galagaHi || 0 };
     this.s = Object.assign(this.fresh(), keep);
     this.s.species = species; this.s.name = (name || 'Пиксель').slice(0, 12);
     this.s.born = true; this.s.stage = 'baby'; this.s.weight = Math.round(this.sp().ideal * .4);
@@ -312,7 +318,7 @@ const Game = {
     const s = this.s;
     const keep = { coins:s.coins, gen:s.gen + 1, awards:s.awards.slice(), graveyard:s.graveyard.slice(),
       unlocked:Object.assign({},s.unlocked), owned:Object.assign({},s.owned), items:Object.assign({},s.items),
-      theme:s.theme, speed:s.speed, sound:s.sound, stats:Object.assign({},s.stats) };
+      theme:s.theme, speed:s.speed, sound:s.sound, stats:Object.assign({},s.stats), galagaHi:s.galagaHi || 0 };
     this.s = Object.assign(this.fresh(), keep);
     this.save();
   },
@@ -455,6 +461,32 @@ const Game = {
     else { s.owned[id] = true; if (it.kind === 'theme') s.theme = id; }
     this.emit('buy', { id });
     return { ok:true, msg: it.name + ' — куплено!' };
+  },
+   
+    /* ---------- ГАЛАГА: результат всегда радует питомца ---------- */
+  finishGalaga(r) {
+    const s = this.s;
+    if (!s.born) return { ok:false, coins:0 };
+    r = r || {};
+    const sc = Math.max(0, r.score || 0), st = Math.max(1, r.stage || 1);
+    s.stats.games++; s.stats.galaga = (s.stats.galaga || 0) + 1;
+    s.stats.galagaBest = Math.max(s.stats.galagaBest || 0, sc);
+    if (sc > (s.galagaHi || 0)) s.galagaHi = sc;
+    const joy = 1.7 + Math.min(1.5, sc / 12000) + (r.won ? .4 : 0);
+    s.happy = Math.min(4, s.happy + joy);
+    s.weight = Math.max(3, s.weight - 2 - Math.min(4, st * .4));
+    s.energy = Math.max(0, s.energy - 10);
+    const coins = 12 + Math.floor(sc / 400) + st * 3 + (r.perfect ? 40 : 0) + (r.dual ? 25 : 0);
+    this.addCoins(coins);
+    if (r.won) { s.stats.wins++; if (s.stats.wins >= 10) this.award('gamer'); }
+    if (r.dual) this.award('galaga_dual');
+    if (r.perfect) this.award('galaga_perfect');
+    if (sc >= 20000) this.award('galaga_ace');
+    if (sc >= 50000) this.award('galaga_legend');
+    if (s.call && !s.call.fake) { s.call = null; s.tC = 0; }
+    this.emit('galaga', { score: sc, coins: coins });
+    this.save();
+    return { ok:true, coins: coins, joy: joy };
   },
 
   /* ---------- ДНК для рендера ---------- */
