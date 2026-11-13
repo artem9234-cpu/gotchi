@@ -8,7 +8,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Балбесов двор — карманный питомец</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link rel="stylesheet" href="style.css?v=8">
+<link rel="stylesheet" href="style.css?v=9">
+<style>.memorial[hidden],.away[hidden]{display:none!important}</style>
 </head>
 <body class="phase-hatchery">
 
@@ -39,7 +40,6 @@
 </header>
 
 <main class="stage">
-
   <section class="hatchery" id="hatchery">
     <div class="hatch-head">
       <p class="kicker">поколение <b id="genNum">1</b></p>
@@ -67,7 +67,6 @@
         <span class="shell-brand">БАЛБЕСОВ ДВОР</span>
         <span class="model"><span class="callamp" id="callLamp" title="Питомец зовёт"></span>зов питомца</span>
       </div>
-
       <div class="screen-frame">
         <div class="iconrail" id="railTop"></div>
         <div class="lcd" id="lcdBox">
@@ -78,7 +77,6 @@
         </div>
         <div class="iconrail" id="railBottom"></div>
       </div>
-
       <div class="hud" id="hud">
         <div class="hud-row">
           <div class="hud-cell"><span class="hud-lbl">Сытость</span><span class="hearts" id="hHunger"></span></div>
@@ -92,7 +90,6 @@
           <span id="mStage">—</span><b>·</b><span id="mAge">0 д</span><b>·</b><span id="mWeight">0 г</span><b>·</b><span id="mDisc">дисц. 0%</span>
         </div>
       </div>
-
       <div class="pad">
         <button class="key key-a" id="keyA" aria-label="Кнопка A — выбор"><b>A</b><small>выбор</small></button>
         <button class="key key-b" id="keyB" aria-label="Кнопка B — подтвердить"><b>B</b><small>ок</small></button>
@@ -138,10 +135,11 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="js/audio.js?v=8"></script>
-<script src="js/pixel.js?v=8"></script>
-<script src="js/state.js?v=8"></script>
-<script src="js/telegram.js?v=8"></script>
-<script src="js/app.js?v=8"></script>
+<script src="js/audio.js?v=9"></script>
+<script src="js/pixel.js?v=9"></script>
+<script src="js/state.js?v=9"></script>
+<script src="js/telegram.js?v=9"></script>
+<script src="js/galaga.js?v=9"></script>
+<script src="js/app.js?v=9"></script>
 </body>
 </html>
