@@ -125,6 +125,7 @@ function haptic(kind) { try { if (tg && tg.HapticFeedback) tg.HapticFeedback.imp
 function notifyHaptic(t) { try { if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred(t); } catch (e) {} }
 
 function press(k) {
+  if (mode === 'galaga') return;
   Sound.unlock();
   const btn = $('key' + k); if (btn) { btn.classList.add('press'); setTimeout(() => btn.classList.remove('press'), 110); }
   haptic('light');
@@ -166,10 +167,11 @@ function pickIcon(i) {
   else if (id === 'play') {
     if (s.sleeping) return toast('Он спит. Разбудить — ошибка ухода.', 'bad');
     if (s.energy < 12) return toast('Слишком устал. Пусть поспит.', 'bad');
-    const items = [{ label:'ЛЕВО-ПРАВО', hint:'классика, 5 раундов', run: startLR }];
-    if (s.owned.ball) items.push({ label:'ЛОВИ СЕРДЕЧКИ', hint:'аркада, 30 секунд', run: startCatch });
-    else items.push({ label:'АРКАДА 🔒', hint:'купи мяч в магазине', run: () => { openPanel('shop'); toast('Мяч открывает вторую игру'); } });
-    openSub('ВО ЧТО ИГРАЕМ?', items);
+    openSub('ВО ЧТО ИГРАЕМ?', [
+      { label:'ГАЛАГА', hint:'космическая аркада', run: startGalaga },
+      { label:'ЛЕВО-ПРАВО', hint:'классика, 5 раундов', run: startLR },
+      { label:'ЛОВИ СЕРДЕЧКИ', hint:'аркада, 30 секунд', run: startCatch }
+    ]);
   }
   else if (id === 'med') openSub('ЛЕЧЕНИЕ', [
     { label:'МИКСТУРА', hint:s.sick ? ('доз осталось: ' + s.sickDose) : 'профилактика', run: () => act(Game.medicine, 'heal') },
@@ -200,6 +202,44 @@ function doPet() {
   burst('heart', A.x, A.y - 34, 4, { c:'#ff3d8b' });
   Game.save();
 }
+   
+/* ---------- ГАЛАГА ---------- */
+function petPortrait() {
+  try {
+    const c = document.createElement('canvas'); c.width = 40; c.height = 40;
+    const cc = c.getContext('2d'); cc.imageSmoothingEnabled = false;
+    Pixel.R(cc, 0, 0, 40, 40, '#120a24');
+    Pixel.drawPet(cc, { x:20, y:37, scale:.6, dna:Game.dna(), pal:Game.pal(),
+      theme:Pixel.theme('color'), t:0, eyes:'happy', blush:true, flip:false, walk:false });
+    return c.toDataURL();
+  } catch (e) { return null; }
+}
+function startGalaga() {
+  if (!window.Galaga) return toast('Аркада не загрузилась. Обнови страницу.', 'bad');
+  mode = 'galaga'; menuIdx = -1; sub = null; syncRail();
+  Sound.play('confirm'); haptic('medium');
+  Galaga.open({
+    petName: Game.s.name,
+    petPortrait: petPortrait(),
+    hiScore: Game.s.galagaHi || 0,
+    extraLife: !!Game.s.owned.ball,
+    sound: !!Game.s.sound,
+    onSound: v => {
+      Game.s.sound = !!v; Sound.set(!!v);
+      $('btnSound').classList.toggle('off', !v); Game.save();
+    },
+    onExit: r => {
+      mode = 'idle';
+      const res = Game.finishGalaga(r || {});
+      A.blush = 2.4; A.hopV = -64;
+      burst('heart', A.x, A.y - 32, 14, { c:'#ff3d8b' });
+      burst('star', A.x, A.y - 42, 12, { c:'#b6ff3d' });
+      Sound.play('happy'); notifyHaptic('success');
+      if (res && res.ok) toast('🚀 Питомец в восторге от Галаги! +' + res.coins + ' готчи', 'good');
+      refreshHUD(true); syncRail(); fitCanvas(); Game.save();
+    }
+  });
+}
 
 /* ---------- мини-игра «Лево-Право» ---------- */
 function startLR() {
@@ -229,7 +269,10 @@ function updateLR(dt) {
     } else { L.phase = 'ask'; L.timer = 0; A.flip = false; Sound.play('blip'); }
   }
 }
-function exitGame() { mode = 'idle'; A.lr = null; A.catch = null; A.flip = false; Sound.play('cancel'); syncRail(); }
+function exitGame() {
+  if (window.Galaga && Galaga.active) { Galaga.requestExit(); return; }
+  mode = 'idle'; A.lr = null; A.catch = null; A.flip = false; Sound.play('cancel'); syncRail();
+}
 
 /* ---------- аркада «Лови сердечки» ---------- */
 function startCatch() {
@@ -520,6 +563,7 @@ function refreshHUD(force) {
   const hint = mode === 'lr' ? 'A — влево · C — вправо · B — выход'
     : mode === 'catch' ? 'A/C — движение · B — пауза · удерживай для бега'
     : mode === 'sub' ? 'A — листать · B — выбрать · C — назад'
+    : mode === 'galaga' ? 'Галага: тяни по экрану или ← → · огонь автоматом'
     : mode === 'hatch' ? 'Жми B, чтобы помочь вылупиться'
     : 'A — листать меню · B — подтвердить · C — отмена / погладить';
   $('padHint').textContent = hint;
@@ -556,7 +600,11 @@ function renderPanel() {
       card('Сейчас нужно', need.length ? '<p class="note" style="color:#ffb020">' + need.join(' · ') + '</p>' : '<p class="note" style="color:#46e08a">Всё в порядке. Можно просто погладить — кнопка C.</p>') +
       card('Расходники', kv('🍎 Яблоко', s.items.apple || 0) + kv('🍰 Торт', s.items.cake || 0) + kv('💊 Витамины', s.items.vitamin || 0)) +
       card('Летопись', kv('Кормлений', s.stats.meals) + kv('Сладостей', s.stats.snacks) + kv('Игр / побед', s.stats.games + ' / ' + s.stats.wins) +
-        kv('Уборок', s.stats.cleans) + kv('Вылечено', s.stats.cures) + kv('Поколение', s.gen));
+        kv('Уборок', s.stats.cleans) + kv('Вылечено', s.stats.cures) + kv('Поколение', s.gen)) +
+      card('🚀 Галага', kv('Игр сыграно', s.stats.galaga || 0) +
+        kv('Рекорд', (s.galagaHi || 0).toLocaleString('ru-RU')) +
+        kv('Жизней в игре', s.owned.ball ? '4 (жетон куплен)' : '3') +
+        '<p class="note">Питомец радуется любой игре — и победе, и поражению. Рекорд хранится в облаке.</p>');
   }
   else if (tab === 'shop') {
     el.innerHTML = '<div class="card"><h4>Баланс</h4><div class="kv"><span>Готчи</span><b style="color:#ffb020">' + s.coins + '</b></div>' +
@@ -740,8 +788,11 @@ function loop(now) {
     Game.tick(Date.now());
     drainEvents();
     updateAnim(dt);
+    if (window.Galaga && Galaga.active) Galaga.frame(now, dt);
+    else {
     render();
     if (document.body.classList.contains('phase-hatchery')) renderPreviews(A.t);
+    }
   } catch (e) {
     if (!errShown) { errShown = true; showFatal('loop: ' + (e && e.message ? e.message : e)); }
   }
@@ -769,6 +820,7 @@ function boot() {
         tg.BackButton.onClick(() => {
           if (!$('memorial').hidden) return;
           if (document.body.classList.contains('panel-open')) { closePanel(); tg.BackButton.hide(); return; }
+          if (window.Galaga && Galaga.active) { Galaga.requestExit(); return; }
           if (mode === 'sub') { closeSub(); return; }
           if (mode === 'lr' || mode === 'catch') { exitGame(); return; }
           if (menuIdx >= 0) { menuIdx = -1; syncRail(); return; }
@@ -845,7 +897,8 @@ function boot() {
   lt.addEventListener('pointerleave', () => { if (A.catch) A.catch.dir = 0; });
 
   /* --- клавиатура --- */
-  window.addEventListener('keydown', e => {
+    window.addEventListener('keydown', e => {
+    if (window.Galaga && Galaga.active) return;
     if (e.target && e.target.tagName === 'INPUT') return;
     const k = e.key.toLowerCase();
     if (k === 'arrowleft' || k === 'a' || k === 'ф') { e.preventDefault(); press('A'); }
@@ -861,8 +914,8 @@ function boot() {
 
   /* --- жизненный цикл вкладки --- */
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { Game.save(); stop(); }
-    else { Game.tick(Date.now()); drainEvents(); start(); }
+    if (document.hidden) { if (window.Galaga && Galaga.active) Galaga.pause(true); Game.save(); stop(); }
+    else { if (window.Galaga && Galaga.active) Galaga.pause(false); Game.tick(Date.now()); drainEvents(); start(); }
   });
   window.addEventListener('pagehide', () => Game.save());
   window.addEventListener('beforeunload', () => Game.save());
