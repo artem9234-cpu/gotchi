@@ -194,7 +194,8 @@ const TMA = (() => {
     }
     return '🐣 ' + s.name + ' — ' + (STAGE[s.stage] || s.stage) + ' в Балбесовом дворе!\n' +
            '📅 ' + g.ageDays().toFixed(1) + ' суток · ⚖️ ' + Math.round(s.weight) + ' г\n' +
-           '💚 уход ' + g.careScore() + '/100 · 🏆 наград ' + s.awards.length + '/11 · 🪙 ' + s.coins + '\n' +
+           '💚 уход ' + g.careScore() + '/100 · 🏆 наград ' + s.awards.length + '/' + AWARDS.length + ' · 🪙 ' + s.coins + '\n' +
+           '🚀 рекорд Галаги: ' + (s.galagaHi || 0).toLocaleString('ru-RU') + '\n' +
            'Заведи своего питомца:';
   }
   function share() {
